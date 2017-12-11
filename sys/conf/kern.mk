@@ -78,7 +78,7 @@ FORMAT_EXTENSIONS=	-Wno-format
 .elif ${COMPILER_TYPE} == "clang" && ${COMPILER_VERSION} >= 30600
 FORMAT_EXTENSIONS=	-D__printf__=__freebsd_kprintf__
 .else
-FORMAT_EXTENSIONS=	-fformat-extensions
+FORMAT_EXTENSIONS= 	-Wno-format
 .endif
 
 #
@@ -184,6 +184,11 @@ CFLAGS.gcc+=	-mcall-aixdesc
 CFLAGS.clang+=	-mabi=elfv2
 .endif
 
+.if ${MACHINE_ARCH} == "powerpc64le"
+CFLAGS.gcc+=	-mabi=elfv2
+CFLAGS.clang+=	-mabi=elfv2
+.endif
+
 #
 # For MIPS we also tell gcc to use floating point emulation
 #
@@ -273,6 +278,9 @@ LD_EMULATION_mipsn32el= elf32btsmipn32_fbsd   # I don't think this is a thing th
 LD_EMULATION_powerpc= elf32ppc_fbsd
 LD_EMULATION_powerpcspe= elf32ppc_fbsd
 LD_EMULATION_powerpc64= elf64ppc_fbsd
+LD_EMULATION_powerpc64le= elf64leppc_fbsd
 LD_EMULATION_riscv64= elf64lriscv
 LD_EMULATION_sparc64= elf64_sparc_fbsd
 LD_EMULATION=${LD_EMULATION_${MACHINE_ARCH}}
+### TODO: Fix this
+LD_EMULATION=elf64lppc_fbsd

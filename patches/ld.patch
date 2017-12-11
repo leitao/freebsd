@@ -1,0 +1,185 @@
+diff --git a/ld/Makefile.am b/ld/Makefile.am
+index 6243c12528..3909958ff2 100644
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
+@@ -251,6 +251,7 @@ ALL_EMULATION_SOURCES = \
+ 	eelf32lm32.c \
+ 	eelf32lm32fd.c \
+ 	eelf32lppc.c \
++	eelf32lppc_fbsd.c \
+ 	eelf32lppclinux.c \
+ 	eelf32lppcnto.c \
+ 	eelf32lppcsim.c \
+@@ -492,6 +493,7 @@ ALL_64_EMULATION_SOURCES = \
+ 	eelf64btsmip_fbsd.c \
+ 	eelf64hppa.c \
+ 	eelf64lppc.c \
++	eelf64lppc_fbsd.c \
+ 	eelf64lriscv.c \
+ 	eelf64ltsmip.c \
+ 	eelf64ltsmip_fbsd.c \
+@@ -1162,6 +1164,15 @@ eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
+   $(srcdir)/emultempl/ppc32elf.em ldemul-list.h \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf32lppc_fbsd.c: $(srcdir)/emulparams/elf32lppc_fbsd.sh \
++  $(srcdir)/emulparams/elf32lppc.sh \
++  $(srcdir)/emulparams/elf32ppc.sh \
++  $(srcdir)/emulparams/elf32ppccommon.sh \
++  $(srcdir)/emulparams/elf_fbsd.sh \
++  $(srcdir)/emulparams/dynamic_undefined_weak.sh \
++  $(srcdir)/emultempl/ppc32elf.em ldemul-list.h \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++
+ eelf32lppclinux.c: $(srcdir)/emulparams/elf32lppclinux.sh \
+   $(srcdir)/emulparams/elf32lppc.sh $(srcdir)/emulparams/elf32ppc.sh \
+   $(srcdir)/emulparams/elf32ppccommon.sh \
+@@ -1993,6 +2004,13 @@ eelf64lppc.c: $(srcdir)/emulparams/elf64lppc.sh \
+   $(srcdir)/emultempl/ppc64elf.em ldemul-list.h \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf64lppc_fbsd.c: $(srcdir)/emulparams/elf64lppc_fbsd.sh \
++  $(srcdir)/emulparams/elf64lppc.sh $(srcdir)/emulparams/elf64ppc.sh \
++  $(srcdir)/emulparams/elf_fbsd.sh \
++  $(srcdir)/emulparams/dynamic_undefined_weak.sh \
++  $(srcdir)/emultempl/ppc64elf.em ldemul-list.h \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++
+ eelf64lriscv.c: $(srcdir)/emulparams/elf64lriscv.sh \
+   $(srcdir)/emulparams/elf64lriscv-defs.sh \
+   $(srcdir)/emulparams/elf32lriscv-defs.sh $(ELF_DEPS) \
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index 760c037f9d..534ddd06b9 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -620,6 +620,7 @@ ALL_EMULATION_SOURCES = \
+ 	eelf32lm32.c \
+ 	eelf32lm32fd.c \
+ 	eelf32lppc.c \
++	eelf32lppc_fbsd.c \
+ 	eelf32lppclinux.c \
+ 	eelf32lppcnto.c \
+ 	eelf32lppcsim.c \
+@@ -860,6 +861,7 @@ ALL_64_EMULATION_SOURCES = \
+ 	eelf64btsmip_fbsd.c \
+ 	eelf64hppa.c \
+ 	eelf64lppc.c \
++	eelf64lppc_fbsd.c \
+ 	eelf64lriscv.c \
+ 	eelf64ltsmip.c \
+ 	eelf64ltsmip_fbsd.c \
+@@ -1249,6 +1251,7 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lm32fd.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lmip.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppc.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppc_fbsd.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppclinux.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppcnto.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lppcsim.Po@am__quote@
+@@ -1308,6 +1311,7 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64btsmip_fbsd.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64hppa.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc_fbsd.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ltsmip.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ltsmip_fbsd.Po@am__quote@
+@@ -2726,6 +2730,15 @@ eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
+   $(srcdir)/emultempl/ppc32elf.em ldemul-list.h \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf32lppc_fbsd.c: $(srcdir)/emulparams/elf32lppc_fbsd.sh \
++  $(srcdir)/emulparams/elf32lppc.sh \
++  $(srcdir)/emulparams/elf32ppc.sh \
++  $(srcdir)/emulparams/elf32ppccommon.sh \
++  $(srcdir)/emulparams/elf_fbsd.sh \
++  $(srcdir)/emulparams/dynamic_undefined_weak.sh \
++  $(srcdir)/emultempl/ppc32elf.em ldemul-list.h \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++
+ eelf32lppclinux.c: $(srcdir)/emulparams/elf32lppclinux.sh \
+   $(srcdir)/emulparams/elf32lppc.sh $(srcdir)/emulparams/elf32ppc.sh \
+   $(srcdir)/emulparams/elf32ppccommon.sh \
+@@ -3557,6 +3570,13 @@ eelf64lppc.c: $(srcdir)/emulparams/elf64lppc.sh \
+   $(srcdir)/emultempl/ppc64elf.em ldemul-list.h \
+   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+ 
++eelf64lppc_fbsd.c: $(srcdir)/emulparams/elf64lppc_fbsd.sh \
++  $(srcdir)/emulparams/elf64lppc.sh $(srcdir)/emulparams/elf64ppc.sh \
++  $(srcdir)/emulparams/elf_fbsd.sh \
++  $(srcdir)/emulparams/dynamic_undefined_weak.sh \
++  $(srcdir)/emultempl/ppc64elf.em ldemul-list.h \
++  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
++
+ eelf64lriscv.c: $(srcdir)/emulparams/elf64lriscv.sh \
+   $(srcdir)/emulparams/elf64lriscv-defs.sh \
+   $(srcdir)/emulparams/elf32lriscv-defs.sh $(ELF_DEPS) \
+diff --git a/ld/configure.tgt b/ld/configure.tgt
+index 6183a85b3d..5245153c75 100644
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
+@@ -599,30 +599,29 @@ pjl*-*-*)		targ_emul=pjlelf
+ 			targ_extra_emuls="elf_i386 elf_iamcu" ;;
+ pj*-*-*)		targ_emul=pjelf
+ 			;;
+-powerpc-*-freebsd* | powerpc-*-kfreebsd*-gnu)
+-			targ_emul=elf32ppc_fbsd
+-			targ_extra_emuls="elf32ppc elf32ppcsim"
+-			targ_extra_libpath=elf32ppc;
+-			tdir_elf32ppcsim=`echo ${targ_alias} | sed -e 's/ppc/ppcsim/'` ;;
+-powerpc64-*-freebsd*)
+-			targ_emul=elf64ppc_fbsd
+-			targ_extra_emuls="elf64ppc elf32ppc_fbsd elf32ppc"
+-			targ_extra_libpath="elf32ppc_fbsd elf32ppc"
+-			tdir_elf32ppc=`echo "${targ_alias}" | sed -e 's/64//'`
+-			tdir_elf32ppc_fbsd=$tdir_elf32ppc
+-			;;
+ powerpc-*-vxworks*)
+ 			targ_emul=elf32ppcvxworks
+ 			targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim" ;;
+ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
+   | powerpc*-*-linux* | powerpc*-*-netbsd* | powerpc*-*-openbsd* \
+-  | powerpc*-*-rtems* \
++  | powerpc*-*-*freebsd* | powerpc*-*-rtems* \
+   | powerpc*-*-solaris* | powerpc*-*-kaos* | powerpc*-*-vxworks*)
+ 			case "${targ}" in
++			powerpc64*-freebsd*)
++			    targ_emul=elf64ppc_fbsd
++			    targ_extra_emuls="elf64ppc elf32ppc_fbsd elf32ppc"
++			    targ_extra_libpath="elf32ppc_fbsd elf32ppc" ;;
+ 			powerpc64*)
+ 			    targ_emul=elf64ppc
+ 			    targ_extra_emuls="elf32ppc elf32ppclinux elf32ppcsim"
+ 			    targ_extra_libpath="elf32ppc elf32ppclinux" ;;
++			*freebsd*)
++			    targ_emul=elf32ppc_fbsd
++			    targ_extra_emuls="elf32ppc elf32ppcsim"
++			    targ_extra_libpath=elf32ppc
++			    tdir_elf32ppcsim=`echo ${targ_alias} | sed -e 's/ppc/ppcsim/'`
++			    targ64_extra_emuls="elf64ppc_fbsd elf64ppc"
++			    targ64_extra_libpath="elf64ppc_fbsd elf64ppc";;
+ 			*linux*)
+ 			    targ_emul=elf32ppclinux
+ 			    targ_extra_emuls="elf32ppc elf32ppcsim"
+@@ -662,8 +661,10 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
+ 			ta64=`echo "${cpu}" | sed -e 's/64//;s/$/64/;s/'${le}'64$/64'${le}'/;s/be64$/64be/'`"${rest}"
+ 			eval test -n \"\$${td}\" || eval ${td}="${ta32}"
+ 			eval test -n \"\$${td}linux\" || eval ${td}linux="${ta32}"
++			eval test -n \"\$${td}_fbsd\" || eval ${td}_fbsd="${ta32}"
+ 			eval test -n \"\$${td}sim\" || eval ${td}sim="${ta32}"
+ 			eval test -n \"\$${td64}\" || eval ${td64}="${ta64}"
++			eval test -n \"\$${td64}_fbsd\" || eval ${td64}_fbsd="${ta64}"
+ 			# Now provide the other endian
+ 			for z in targ_extra_emuls targ_extra_libpath
+ 			do
+@@ -685,8 +686,10 @@ powerpc*-*-elf* | powerpc*-*-eabi* | powerpc*-*-sysv* \
+ 			ta64=`echo "${cpu}" | sed -e 's/64//;s/$/64/;s/'${le}'64$/64'${le}/`"${rest}"
+ 			eval test -n \"\$${td}\" || eval ${td}="${ta32}"
+ 			eval test -n \"\$${td}linux\" || eval ${td}linux="${ta32}"
++			eval test -n \"\$${td}_fbsd\" || eval ${td}_fbsd="${ta32}"
+ 			eval test -n \"\$${td}sim\" || eval ${td}sim="${ta32}"
+ 			eval test -n \"\$${td64}\" || eval ${td64}="${ta64}"
++			eval test -n \"\$${td64}_fbsd\" || eval ${td64}_fbsd="${ta64}"
+ 			;;
+ powerpc-*-nto*)		targ_emul=elf32ppcnto ;;
+ powerpcle-*-nto*)	targ_emul=elf32lppcnto ;;

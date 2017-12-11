@@ -55,9 +55,14 @@
 #ifndef MACHINE
 #define	MACHINE		"powerpc"
 #endif
+#define	MACHINE_ARCH	"powerpc64le"
 #ifndef MACHINE_ARCH
 #ifdef __powerpc64__
+#if BYTE_ORDER == _LITTLE_ENDIAN
+#define	MACHINE_ARCH	"powerpc64le"
+#else
 #define	MACHINE_ARCH	"powerpc64"
+#endif
 #else
 #ifdef	__SPE__
 #define	MACHINE_ARCH	"powerpcspe"

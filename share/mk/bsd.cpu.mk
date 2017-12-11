@@ -138,6 +138,8 @@ _CPUCFLAGS = -mcpu=${CPUTYPE} -mno-powerpc64
 _CPUCFLAGS = -Wa,-me500 -mspe=yes -mabi=spe -mfloat-gprs=double
 . elif ${MACHINE_ARCH} == "powerpc64"
 _CPUCFLAGS = -mcpu=${CPUTYPE}
+. elif ${MACHINE_ARCH} == "powerpc64le"
+_CPUCFLAGS = -mcpu=power8 -mabi=elfv2
 . elif ${MACHINE_CPUARCH} == "mips"
 # mips[1234], mips32, mips64, and all later releases need to have mips
 # preserved (releases later than r2 require external toolchain)
