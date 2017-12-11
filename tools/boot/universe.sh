@@ -69,7 +69,7 @@ for i in \
 	arm64/aarch64 \
 	i386/i386 \
 	mips/mips mips/mips64 \
-	powerpc/powerpc powerpc/powerpc64 \
+	powerpc/powerpc powerpc/powerpc64 powerpc/powerpc64le\
 	sparc64/sparc64 \
 	; do
     ta=${i##*/}

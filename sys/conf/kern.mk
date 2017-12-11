@@ -78,7 +78,7 @@ FORMAT_EXTENSIONS=	-Wno-format
 .elif ${COMPILER_TYPE} == "clang" && ${COMPILER_VERSION} >= 30600
 FORMAT_EXTENSIONS=	-D__printf__=__freebsd_kprintf__
 .else
-FORMAT_EXTENSIONS=	-fformat-extensions
+FORMAT_EXTENSIONS= 	-Wno-format
 .endif
 
 #
@@ -181,6 +181,11 @@ CFLAGS.gcc+=	-mabi=elfv2
 .else
 CFLAGS.gcc+=	-mcall-aixdesc
 .endif
+CFLAGS.clang+=	-mabi=elfv2
+.endif
+
+.if ${MACHINE_ARCH} == "powerpc64le"
+CFLAGS.gcc+=	-mabi=elfv2
 CFLAGS.clang+=	-mabi=elfv2
 .endif
 

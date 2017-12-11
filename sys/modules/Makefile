@@ -783,7 +783,7 @@ _wi=		wi
 .if ${MACHINE_ARCH} == "powerpc64"
 _drm2=		drm2
 .endif
-.if ${MACHINE_ARCH} == "powerpc64" || ${MACHINE_ARCH} == "powerpc"
+.if ${MACHINE_ARCH} == "powerpc64" || ${MACHINE_ARCH} == "powerpc" || ${MACHINE_ARCH} == "powerpc64le"
 # Don't build powermac_nvram for powerpcspe, it's never supported.
 _nvram=		powermac_nvram
 .endif

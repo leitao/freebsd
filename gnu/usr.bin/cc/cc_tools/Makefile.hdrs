@@ -42,7 +42,7 @@ TARGET_INC+=	${GCC_CPU}/elf.h
 TARGET_INC+=	${GCC_CPU}/aout.h
 TARGET_INC+=	${GCC_CPU}/bpabi.h
 .endif
-.if ${TARGET_ARCH} == "powerpc64"
+.if ${TARGET_ARCH} == "powerpc64" || ${TARGET_ARCH} == "powerpc64le"
 TARGET_INC+=	${GCC_CPU}/biarch64.h
 TARGET_INC+=    ${GCC_CPU}/default64.h
 .endif
