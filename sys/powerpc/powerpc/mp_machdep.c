@@ -104,20 +104,8 @@ machdep_ap_bootstrap(void)
 void
 cpu_mp_setmaxid(void)
 {
-	struct cpuref cpuref;
-	int error;
-
-	mp_ncpus = 0;
-	mp_maxid = 0;
-	error = platform_smp_first_cpu(&cpuref);
-	while (!error) {
-		mp_ncpus++;
-		mp_maxid = max(cpuref.cr_cpuid, mp_maxid);
-		error = platform_smp_next_cpu(&cpuref);
-	}
-	/* Sanity. */
-	if (mp_ncpus == 0)
-		mp_ncpus = 1;
+	mp_ncpus = platform_smp_max_cpu();
+	mp_maxid = mp_ncpus - 1;
 }
 
 int

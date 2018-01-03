@@ -84,6 +84,10 @@ CODE {
 	{
 		return;
 	}
+	static int platform_null_smp_max_cpu(platform_t plat)
+	{
+		return 1;
+	}
 	static void platform_null_idle(platform_t plat, int cpu)
 	{
 		return;
@@ -203,6 +207,15 @@ METHOD int smp_start_cpu {
 METHOD void smp_ap_init {
 	platform_t	_plat;
 } DEFAULT platform_null_smp_ap_init;
+
+
+/**
+ * @brief Max # of CPUs
+ *
+ */
+METHOD int smp_max_cpu {
+	platform_t	_plat;
+} DEFAULT platform_null_smp_max_cpu;
 
 /**
  * @brief Return SMP topology

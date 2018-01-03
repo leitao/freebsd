@@ -73,6 +73,7 @@ static vm_offset_t chrp_real_maxaddr(platform_t);
 static u_long chrp_timebase_freq(platform_t, struct cpuref *cpuref);
 static int chrp_smp_first_cpu(platform_t, struct cpuref *cpuref);
 static int chrp_smp_next_cpu(platform_t, struct cpuref *cpuref);
+static int chrp_smp_max_cpu(platform_t);
 static int chrp_smp_get_bsp(platform_t, struct cpuref *cpuref);
 static void chrp_smp_ap_init(platform_t);
 #ifdef SMP
@@ -92,6 +93,7 @@ static platform_method_t chrp_methods[] = {
 	PLATFORMMETHOD(platform_real_maxaddr,	chrp_real_maxaddr),
 	PLATFORMMETHOD(platform_timebase_freq,	chrp_timebase_freq),
 	
+	PLATFORMMETHOD(platform_smp_max_cpu,	chrp_smp_max_cpu),
 	PLATFORMMETHOD(platform_smp_ap_init,	chrp_smp_ap_init),
 	PLATFORMMETHOD(platform_smp_first_cpu,	chrp_smp_first_cpu),
 	PLATFORMMETHOD(platform_smp_next_cpu,	chrp_smp_next_cpu),
@@ -389,6 +391,33 @@ chrp_smp_first_cpu(platform_t plat, struct cpuref *cpuref)
 #else
 	return (chrp_cpuref_for_server(cpuref, 0, -1));
 #endif
+}
+
+static int
+chrp_smp_max_cpu(platform_t platform)
+{
+	char buf[8];
+	phandle_t cpu, dev, root;
+	int res, ncpu = 0;
+
+	root = OF_peer(0);
+
+	dev = OF_child(root);
+	while (dev != 0) {
+		res = OF_getprop(dev, "name", buf, sizeof(buf));
+		if (res > 0 && strcmp(buf, "cpus") == 0)
+			break;
+		dev = OF_peer(dev);
+	}
+
+	for (cpu = OF_child(dev); cpu != 0; cpu = OF_peer(cpu)) {
+		res = OF_getprop(cpu, "device_type", buf, sizeof(buf));
+		if (strcmp(buf, "cpu") == 0){
+			ncpu++;
+		}
+	}
+
+	return ncpu;
 }
 
 static int

@@ -221,6 +221,12 @@ platform_smp_next_cpu(struct cpuref *cpu)
 }
 
 int
+platform_smp_max_cpu()
+{
+	return (PLATFORM_SMP_MAX_CPU(plat_obj));
+}
+
+int
 platform_smp_get_bsp(struct cpuref *cpu)
 {
 	return (PLATFORM_SMP_GET_BSP(plat_obj, cpu));
