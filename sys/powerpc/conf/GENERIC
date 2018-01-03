@@ -141,17 +141,17 @@ device		uart
 device		uart_z8530
 
 # FireWire support
-device		firewire	# FireWire bus code
-device		sbp		# SCSI over FireWire (Requires scbus and da)
-device		fwe		# Ethernet over FireWire (non-standard!)
+#device		firewire	# FireWire bus code
+#device		sbp		# SCSI over FireWire (Requires scbus and da)
+#device		fwe		# Ethernet over FireWire (non-standard!)
 
 # PCI Ethernet NICs that use the common MII bus controller code.
 device		miibus		# MII bus support
 device		bge		# Broadcom BCM570xx Gigabit Ethernet
-device		bm		# Apple BMAC Ethernet
-device		gem		# Sun GEM/Sun ERI/Apple GMAC
-device		dc		# DEC/Intel 21143 and various workalikes
-device		fxp		# Intel EtherExpress PRO/100B (82557, 82558)
+#device		bm		# Apple BMAC Ethernet
+#device		gem		# Sun GEM/Sun ERI/Apple GMAC
+#device		dc		# DEC/Intel 21143 and various workalikes
+d#evice		fxp		# Intel EtherExpress PRO/100B (82557, 82558)
 
 # Pseudo devices.
 device		loop		# Network loopback
@@ -170,16 +170,16 @@ device		firmware	# firmware assist module
 device		bpf		#Berkeley packet filter
 
 # USB support
-options 	USB_DEBUG	# enable debug msgs
-device		uhci		# UHCI PCI->USB interface
-device		ohci		# OHCI PCI->USB interface
-device		ehci		# EHCI PCI->USB interface
-device		usb		# USB Bus (required)
-device		uhid		# "Human Interface Devices"
-device		ukbd		# Keyboard
-options 	KBD_INSTALL_CDEV # install a CDEV entry in /dev
-device		ulpt		# Printer
-device		umass		# Disks/Mass storage - Requires scbus and da0
+#options 	USB_DEBUG	# enable debug msgs
+#device		uhci		# UHCI PCI->USB interface
+#device		ohci		# OHCI PCI->USB interface
+#device		ehci		# EHCI PCI->USB interface
+#device		usb		# USB Bus (required)
+#device		uhid		# "Human Interface Devices"
+#device		ukbd		# Keyboard
+#options 	KBD_INSTALL_CDEV # install a CDEV entry in /dev
+#device		ulpt		# Printer
+#device		umass		# Disks/Mass storage - Requires scbus and da0
 device		ums		# Mouse
 device		atp		# Apple USB touchpad
 device		urio		# Diamond Rio 500 MP3 player
@@ -191,8 +191,8 @@ device		cue		# CATC USB Ethernet
 device		kue		# Kawasaki LSI USB Ethernet
 
 # Wireless NIC cards
-options 	IEEE80211_SUPPORT_MESH
-options 	AH_SUPPORT_AR5416
+#options 	IEEE80211_SUPPORT_MESH
+#options 	AH_SUPPORT_AR5416
 
 # Misc
 device		iicbus		# I2C bus code
@@ -215,10 +215,10 @@ device		cuda
 device		pmu
 
 # Sound support
-device		sound		# Generic sound driver (required)
-device		snd_ai2s	# Apple I2S audio
-device		snd_davbus	# Apple DAVBUS audio
-device		snd_uaudio	# USB Audio
-
+#device		sound		# Generic sound driver (required)
+#device		snd_ai2s	# Apple I2S audio
+#device		snd_davbus	# Apple DAVBUS audio
+#device		snd_uaudio	# USB Audio
+#
 # The crypto framework is required by IPSEC
 device		crypto			# Required by IPSEC
