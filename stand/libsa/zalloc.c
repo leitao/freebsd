@@ -144,6 +144,20 @@ znalloc(MemPool *mp, uintptr_t bytes)
  * zfree() - free previously allocated memory
  */
 
+void dumpBreno(MemPool *mp){
+	MemNode **pmn;
+	MemNode *mn;
+
+	printf("Mempool base %p and end %p\n", mp->mp_Base, mp->mp_End);
+	printf(" mp_Size %x and mp_Used %x\n", mp->mp_Size, mp->mp_Used);
+
+	for (pmn = &mp->mp_First; (mn = *pmn) != NULL; pmn = &mn->mr_Next) {
+		printf("MN = %p and Byte is %x\n", mn, mn->mr_Bytes);
+	}
+	printf("EOL\n");
+
+}
+
 void
 zfree(MemPool *mp, void *ptr, uintptr_t bytes)
 {
@@ -220,7 +234,8 @@ zfree(MemPool *mp, void *ptr, uintptr_t bytes)
 		/* NOT REACHED */
 	    }
 	    if ((char *)ptr < (char *)mn + mn->mr_Bytes) {
-		panic("zfree(%p,%ju): corrupt memlist2", ptr,
+		dumpBreno(mp);
+		printf("zfree(%p,%ju): corrupt memlist2", ptr,
 		    (uintmax_t)bytes);
 	    }
 	}
