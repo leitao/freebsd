@@ -285,12 +285,29 @@ chrp_real_maxaddr(platform_t plat)
 static u_long
 chrp_timebase_freq(platform_t plat, struct cpuref *cpuref)
 {
-	phandle_t phandle;
+	char buf[8];
+	phandle_t cpu, dev, root;
+	int res;
 	int32_t ticks = -1;
 
-	phandle = cpuref->cr_hwref;
+	root = OF_peer(0);
+	dev = OF_child(root);
+	while (dev != 0) {
+		res = OF_getprop(dev, "name", buf, sizeof(buf));
+		if (res > 0 && strcmp(buf, "cpus") == 0)
+			break;
+		dev = OF_peer(dev);
+        }
 
-	OF_getencprop(phandle, "timebase-frequency", &ticks, sizeof(ticks));
+	for (cpu = OF_child(dev); cpu != 0; cpu = OF_peer(cpu)) {
+		res = OF_getprop(cpu, "device_type", buf, sizeof(buf));
+		if (res > 0 && strcmp(buf, "cpu") == 0)
+			break;
+	}
+	if (cpu == 0)
+		return (512000000);
+
+	OF_getencprop(cpu, "timebase-frequency", &ticks, sizeof(ticks));
 
 	if (ticks <= 0)
 		panic("Unable to determine timebase frequency!");
