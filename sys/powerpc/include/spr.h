@@ -120,6 +120,7 @@
 #define	SPR_EIE			0x050	/* ..8 Exception Interrupt ??? */
 #define	SPR_EID			0x051	/* ..8 Exception Interrupt ??? */
 #define	SPR_NRI			0x052	/* ..8 Exception Interrupt ??? */
+#define	SPR_FSCR		0x099	/* Facility Status and Control Register */
 #define	SPR_USPRG0		0x100	/* 4.. User SPR General 0 */
 #define	SPR_VRSAVE		0x100	/* .6. AltiVec VRSAVE */
 #define	SPR_SPRG0		0x110	/* 468 SPR General 0 */
@@ -674,6 +675,21 @@
 #define	PMC970N_NONE		0x8 /* Count nothing */
 #define	PMC970N_CYCLES		0xf /* Processor cycles */
 #define	PMC970N_ICOMP		0x9 /* Instructions completed */
+
+/* Facility Status and Control (FSCR) definitions */
+#define SPR_FSCR_IC_MASK	0xFF00000000000000ULL	/* FSCR[0:7] is Interrupt Cause */
+#define SPR_FSCR_IC_FP		0x0000000000000000ULL	/* FP unavailable */
+#define SPR_FSCR_IC_VSX		0x0100000000000000ULL	/* VSX unavailable */
+#define SPR_FSCR_IC_DSCR	0x0200000000000000ULL	/* Access to the DSCR at SPRs 3 or 17 */
+#define SPR_FSCR_IC_PM		0x0300000000000000ULL	/* Read or write access of a Performance Monitor SPR in group A */
+#define SPR_FSCR_IC_BHRB	0x0400000000000000ULL	/* Execution of a BHRB Instruction */
+#define SPR_FSCR_IC_HTM		0x0500000000000000ULL	/* Access to a Transactional Memory */
+/* Reserved 0x0500000000000000ULL */
+#define SPR_FSCR_IC_EBB		0x0700000000000000ULL	/* Access to Event-Based Branch */
+#define SPR_FSCR_IC_TAR		0x0800000000000000ULL	/* Access to Target Address Register */
+#define SPR_FSCR_IC_STOP	0x0900000000000000ULL	/* Access to the 'stop' instruction in privileged non-hypervisor state */
+#define SPR_FSCR_IC_MSG		0x0A00000000000000ULL	/* Access to 'msgsndp' or 'msgclrp' instructions */
+#define SPR_FSCR_IC_SCV		0x0C00000000000000ULL	/* Execution of a 'scv' instruction */
 
 #if defined(BOOKE)
 
