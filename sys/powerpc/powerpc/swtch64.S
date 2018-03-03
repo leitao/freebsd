@@ -145,10 +145,20 @@ ENTRY(cpu_switch)
 	lwz	%r7,PCB_FLAGS(%r17)
 	/* Save Altivec context if needed */
 	andi.	%r7, %r7, PCB_VEC
-	beq	.L2
+	beq	.L11
 	bl	save_vec
 	nop
 	
+.L11:
+#if defined(HTM)
+	mr	%r3,%r14		/* restore old thread ptr */
+	lwz	%r7,PCB_FLAGS(%r17)
+	/* Save HTM SPR context if needed */
+	andi.	%r7, %r7, PCB_HTM
+	beq	.L2
+	bl	save_htm
+	nop
+#endif
 .L2:
 	mr	%r3,%r14		/* restore old thread ptr */
 	bl	pmap_deactivate	/* Deactivate the current pmap */
@@ -206,10 +216,21 @@ blocked_loop:
 	lwz	%r6, PCB_FLAGS(%r17)
 	/* Restore Custom DSCR if needed */
 	andi.	%r6, %r6, PCB_CDSCR
-	beq	.L4
+	beq	.L32
 	ld	%r6, PCB_DSCR(%r17)	/* Load the DSCR register*/
 	mtspr	SPR_DSCR, %r6
 
+.L32:
+#if defined(HTM)
+	lwz	%r6, PCB_FLAGS(%r17)
+	/* Restore HTM context if needed */
+	andi.	%r6, %r6, PCB_HTM
+	beq	.L4
+	mr	%r3, %r13		/* Pass curthread to restore_htm*/
+	bl	restore_htm
+	nop
+
+#endif
 	/* thread to restore is in r3 */
 .L4:
 	addi	%r1,%r1,48

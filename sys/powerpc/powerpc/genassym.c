@@ -204,6 +204,7 @@ ASSYM(PCB_FLAGS, offsetof(struct pcb, pcb_flags));
 ASSYM(PCB_FPU, PCB_FPU);
 ASSYM(PCB_VEC, PCB_VEC);
 ASSYM(PCB_CDSCR, PCB_CDSCR);
+ASSYM(PCB_HTM, PCB_HTM);
 
 ASSYM(PCB_AIM_USR_VSID, offsetof(struct pcb, pcb_cpu.aim.usr_vsid));
 ASSYM(PCB_BOOKE_DBCR0, offsetof(struct pcb, pcb_cpu.booke.dbcr0));
@@ -242,6 +243,7 @@ ASSYM(PSL_UBLE, PSL_UBLE);
 #if defined(AIM) && defined(__powerpc64__)
 ASSYM(PSL_SF, PSL_SF);
 ASSYM(PSL_HV, PSL_HV);
+ASSYM(PSL_HTM, PSL_HTM);
 #endif
 
 ASSYM(PSL_POW, PSL_POW);
