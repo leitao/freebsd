@@ -54,6 +54,7 @@ struct pcb {
 #define	PCB_FPREGS	2	/* Process had FPU registers initialized */
 #define	PCB_VEC		4	/* Process had Altivec initialized */
 #define	PCB_VSX		8	/* Process had VSX initialized */
+#define	PCB_HTM		10	/* Process had HTM initialized */
 	struct fpu {
 		union {
 			double fpr;
@@ -71,6 +72,12 @@ struct pcb {
 	} pcb_vec __aligned(16);	/* Vector processor */
 	unsigned int	pcb_veccpu;		/* which CPU had our vector
 							stuff. */
+	struct htm {
+		uint64_t tfhar;
+		uint64_t texasr;
+		uint64_t tfiar;
+	} pcb_htm;
+	unsigned int	pcb_htmcpu;		/* which CPU had HTM enabled */
 
 	union {
 		struct {

@@ -239,6 +239,7 @@ ASSYM(PSL_UBLE, PSL_UBLE);
 #if defined(AIM) && defined(__powerpc64__)
 ASSYM(PSL_SF, PSL_SF);
 ASSYM(PSL_HV, PSL_HV);
+ASSYM(PSL_HTM, PSL_HTM);
 #endif
 
 ASSYM(PSL_POW, PSL_POW);

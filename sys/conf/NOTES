@@ -235,6 +235,9 @@ options 	MAXCPU=32
 # subsystems.
 options 	NUMA
 
+# Enable hardware/restricted transactional memory support in userspace
+options		HTM
+
 # MAXMEMDOM defines the maximum number of memory domains that can boot in the
 # system.  A default value should already be defined by every architecture.
 options 	MAXMEMDOM=2

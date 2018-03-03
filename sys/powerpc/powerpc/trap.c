@@ -63,6 +63,7 @@ __FBSDID("$FreeBSD$");
 
 #include <machine/_inttypes.h>
 #include <machine/altivec.h>
+#include <machine/htm.h>
 #include <machine/cpu.h>
 #include <machine/db_machdep.h>
 #include <machine/fpu.h>
@@ -168,6 +169,16 @@ static struct powerpc_exception powerpc_exceptions[] = {
     "\030b8\027b9\026b10\025b11\024b12\023L2TAG\022L2DAT\021L3TAG"	\
     "\020L3DAT\017APE\016DPE\015TEA\014b20\013b21\012b22\011b23"	\
     "\010b24\007b25\006b26\005b27\004b28\003b29\002b30\001b31"
+
+static inline bool
+frame_is_bad_thing(struct trapframe *frame)
+{
+#if defined(__powerpc64__) && defined(AIM)
+	return (frame->exc == EXC_PGM && frame->srr1 & EXC_PGM_BAD_THING);
+#else
+	return 0;
+#endif
+}
 
 
 static const char *
@@ -297,7 +308,7 @@ trap(struct trapframe *frame)
 		case EXC_FAC:
 			fscr = mfspr(SPR_FSCR);
 			if ((fscr & SPR_FSCR_IC_MASK) == SPR_FSCR_IC_HTM) {
-				CTR0(KTR_TRAP, "Hardware Transactional Memory subsystem disabled");
+				enable_htm_thread(td);
 			}
 			sig = SIGILL;
 			ucode =	ILL_ILLOPC;
@@ -419,6 +430,9 @@ trap(struct trapframe *frame)
 			if (handle_onfault(frame))
  				return;
 			break;
+		case EXC_FAC:
+			fscr = mfspr(SPR_FSCR);
+			panic("Unavailibity Facility. FSCR = 0x%" PRIxPTR, fscr);
 		default:
 			break;
 		}
