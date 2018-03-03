@@ -142,6 +142,15 @@ ENTRY(cpu_switch)
 	
 .L2:
 	mr	%r3,%r14		/* restore old thread ptr */
+	lwz	%r7,PCB_FLAGS(%r17)
+	/* Save HTM SPR context if needed */
+	andi.	%r7, %r7, PCB_HTM
+	beq	.L3
+	bl	save_htm
+	nop
+
+.L3:
+	mr	%r3,%r14		/* restore old thread ptr */
 	bl	pmap_deactivate	/* Deactivate the current pmap */
 	nop
 
@@ -179,22 +188,32 @@ blocked_loop:
 	lwz	%r6, PCB_FLAGS(%r17)
 	/* Restore FPU context if needed */
 	andi.	%r6, %r6, PCB_FPU
-	beq	.L3
+	beq	.L4
 	mr	%r3,%r13		/* Pass curthread to enable_fpu */
 	bl	enable_fpu
 	nop
 
-.L3:
+.L4:
 	lwz	%r6, PCB_FLAGS(%r17)
 	/* Restore Altivec context if needed */
 	andi.	%r6, %r6, PCB_VEC
-	beq	.L4
+	beq	.L5
 	mr	%r3,%r13		/* Pass curthread to enable_vec */
 	bl	enable_vec
 	nop
 
+.L5:
+	lwz	%r6, PCB_FLAGS(%r17)
+	/* Restore Altivec context if needed */
+	andi.	%r6, %r6, PCB_HTM
+	beq	.L6
+	mr	%r3,%r13		/* Pass curthread to enable_vec */
+	bl	enable_htm_thread
+	nop
+
+
 	/* thread to restore is in r3 */
-.L4:
+.L6:
 	addi	%r1,%r1,48
 	mr	%r3,%r17		/* Recover PCB ptr */
 	ld	%r12,PCB_CONTEXT(%r3)	/* Load the non-volatile GP regs. */
