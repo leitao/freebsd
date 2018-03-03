@@ -50,10 +50,11 @@ struct pcb {
 	jmp_buf		*pcb_onfault;		/* For use during
 						    copyin/copyout */
 	int		pcb_flags;
-#define	PCB_FPU		1	/* Process uses FPU */
-#define	PCB_FPREGS	2	/* Process had FPU registers initialized */
-#define	PCB_VEC		4	/* Process had Altivec initialized */
-#define	PCB_VSX		8	/* Process had VSX initialized */
+#define	PCB_FPU		0x1	/* Process uses FPU */
+#define	PCB_FPREGS	0x2	/* Process had FPU registers initialized */
+#define	PCB_VEC		0x4	/* Process had Altivec initialized */
+#define	PCB_VSX		0x8	/* Process had VSX initialized */
+#define	PCB_HTM		0x10	/* Process had HTM initialized */
 	struct fpu {
 		union {
 			double fpr;
@@ -71,6 +72,11 @@ struct pcb {
 	} pcb_vec __aligned(16);	/* Vector processor */
 	unsigned int	pcb_veccpu;		/* which CPU had our vector
 							stuff. */
+	struct htm {
+		uint64_t tfhar;
+		uint64_t texasr;
+		uint64_t tfiar;
+	} pcb_htm;
 
 	union {
 		struct {

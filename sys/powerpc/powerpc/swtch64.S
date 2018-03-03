@@ -136,10 +136,19 @@ ENTRY(cpu_switch)
 	lwz	%r7,PCB_FLAGS(%r17)
 	/* Save Altivec context if needed */
 	andi.	%r7, %r7, PCB_VEC
-	beq	.L2
+	beq	0f
 	bl	save_vec
 	nop
 	
+0:
+	mr	%r3,%r14		/* restore old thread ptr */
+	lwz	%r7,PCB_FLAGS(%r17)
+	/* Save HTM SPR context if needed */
+	andi.	%r7, %r7, PCB_HTM
+	beq	.L2
+	bl	save_htm
+	nop
+
 .L2:
 	mr	%r3,%r14		/* restore old thread ptr */
 	bl	pmap_deactivate	/* Deactivate the current pmap */
@@ -188,9 +197,18 @@ blocked_loop:
 	lwz	%r6, PCB_FLAGS(%r17)
 	/* Restore Altivec context if needed */
 	andi.	%r6, %r6, PCB_VEC
-	beq	.L4
+	beq	2f
 	mr	%r3,%r13		/* Pass curthread to enable_vec */
 	bl	enable_vec
+	nop
+
+2:
+	lwz	%r6, PCB_FLAGS(%r17)
+	/* Restore Altivec context if needed */
+	andi.	%r6, %r6, PCB_HTM
+	beq	.L4
+	mr	%r3,%r13		/* Pass curthread to enable_vec */
+	bl	enable_htm_thread
 	nop
 
 	/* thread to restore is in r3 */
