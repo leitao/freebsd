@@ -309,9 +309,20 @@ trap(struct trapframe *frame)
 
 		case EXC_FAC:
 			fscr = mfspr(SPR_FSCR);
+			printf("FAC trap\n");
 			if ((fscr & SPR_FSCR_IC_MASK) == SPR_FSCR_IC_HTM) {
 #ifdef HTM
-				enable_htm_thread(td);
+				
+				if (!(td->td_pcb->pcb_flags & PCB_HTM)) {
+					printf("Enabling HTM for thread\n");
+					enable_htm_thread(td);
+				} else {
+					printf("Illegal Instruction and PCB enabled!?\n");
+					sig = SIGILL;
+					ucode =	ILL_ILLOPC;
+				}
+				
+
 				break;
 #endif
 			}
@@ -357,6 +368,24 @@ trap(struct trapframe *frame)
 			break;
 
 		case EXC_PGM:
+		/* If userspace has been using HTM, then we need to enable here also */
+			printf("PGM trap with srr1 = %lx\n", frame->srr1);
+
+			if (htm_suspended(frame->srr1)){
+				printf("State Suspended\n");
+			}
+			if (htm_transactional(frame->srr1)) {
+				printf("State Transacational\n");
+			}
+
+			printf("Returning with srr1 = %lx\n", frame->srr1);
+			printf("Returning to srr0 = %lx\n", frame->srr0);
+
+			// Disable state
+			frame->srr0 &= ~PSL_HTM_TS;
+			sig = SIGTRAP;
+			ucode = TRAP_BRKPT;
+			break;
 			/* Identify the trap reason */
 			if (frame_is_trap_inst(frame)) {
 #ifdef KDTRACE_HOOKS
@@ -405,8 +434,13 @@ trap(struct trapframe *frame)
 		    ("kernel trap doesn't have ucred"));
 		switch (type) {
 		case EXC_PGM:
-			if (frame_is_bad_thing(frame))
-				panic("Bad thing exception in kernel space\n");
+			if (frame_is_bad_thing(frame)) {
+				printf("Bad thing exception in kernel space.  MSR = %lx\n", mfmsr());
+				printf("ssr1 = %lx\n", frame->srr1);
+				trap_fatal(frame);
+				panic("dying\n");
+			}
+			
 #ifdef KDTRACE_HOOKS
 			if (frame_is_trap_inst(frame)) {
 				if (*(uint32_t *)frame->srr0 == EXC_DTRACE) {

@@ -32,6 +32,7 @@
 #include <sys/proc.h>
 #include <sys/systm.h>
 #include <sys/limits.h>
+#include <ddb/ddb.h>
 
 #include <machine/htm.h>
 #include <machine/pcb.h>
@@ -39,11 +40,10 @@
 
 #include "opt_platform.h"
 
-static void enable_htm_current_cpu(void);
 static void restore_htm_sprs(struct pcb *pcb);
 
 /* Enable HTM flag on current CPU MSR */
-static void enable_htm_current_cpu() {
+void enable_htm_current_cpu() {
 	register_t msr;
 
 	msr = mfmsr();
@@ -53,8 +53,16 @@ static void enable_htm_current_cpu() {
 
 /* Restore HTM Special registers to CPU from PCB area */
 static void restore_htm_sprs(struct pcb *pcb) {
-	KASSERT(mfmsr() & PSL_HTM,
+	register_t msr;
+
+	msr = mfmsr();
+	KASSERT(msr & PSL_HTM,
 		("Trying to restore HTM SPRs without having MSR[HTM] enabled\n"));
+
+	if (msr & PSL_HTM_TS){
+		printf("restore: Not able to change the HTM registers while the transactional is enabled\n");
+		return;
+	}
 	mtspr(SPR_TFHAR, pcb->pcb_htm.tfhar);
 	mtspr(SPR_TEXASR, pcb->pcb_htm.texasr);
 	mtspr(SPR_TFIAR, pcb->pcb_htm.tfiar);
@@ -64,8 +72,17 @@ static void restore_htm_sprs(struct pcb *pcb) {
 
 /*  Save HTM Special registers to PCB */
 static void save_htm_sprs(struct pcb *pcb) {
-	KASSERT(mfmsr() & PSL_HTM,
+	register_t msr;
+
+	msr = mfmsr();
+	KASSERT(msr & PSL_HTM,
 		("Trying to save HTM SPRs without having MSR[HTM] enabled\n"));
+
+	if (msr & PSL_HTM_TS){
+		printf("save: Not able to change the HTM registers while the transactional is enabled\n");
+		//db_trace_self();
+		return;
+	}
 	pcb->pcb_htm.tfhar = mfspr(SPR_TFHAR);
 	pcb->pcb_htm.texasr = mfspr(SPR_TEXASR);
 	pcb->pcb_htm.tfiar = mfspr(SPR_TFIAR);
@@ -88,6 +105,31 @@ void save_htm(struct thread *td) {
         PCPU_SET(htmthread, NULL);
 }
 
+void htm_reclaim() {
+// Treclaim to r4
+// TRECLAIM opcode 0x7c00075d
+// r4 = 0x40000
+//== 	
+#define TRECLAIM __asm(".long 0x7C04075D\n")
+	__asm ("li 4, 4 \n");
+	TRECLAIM;
+}
+
+
+int htm_suspended(register_t msr){
+	if (msr & PSL_HTM_TS_S)
+		return 1;
+
+	return 0;
+}
+
+int htm_transactional(register_t msr){
+	if (msr & PSL_HTM_TS_T)
+		return 1;
+
+	return 0;
+}
+
 /* Enable HTM on a thread */
 void enable_htm_thread(struct thread *td) {
         struct  pcb *pcb;
@@ -101,6 +143,12 @@ void enable_htm_thread(struct thread *td) {
          * vector thread
          */
         PCPU_SET(htmthread, td);
+
+	if (tf->srr1 & PSL_HTM_TS){
+		printf("Enable but already enabled?!\n");
+		db_trace_self();
+	}
+	
 
         /*
          * Enable the HTM feature unit for when the thread returns from the
@@ -120,4 +168,5 @@ void enable_htm_thread(struct thread *td) {
 	enable_htm_current_cpu();
 
 	restore_htm_sprs(pcb);
+	printf("Exiting htm thread\n");
 }

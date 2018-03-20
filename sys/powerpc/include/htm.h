@@ -33,6 +33,11 @@
 
 void enable_htm_thread(struct thread *td);
 void save_htm(struct thread *td);
+void htm_reclaim(void);
+void enable_htm_current_cpu(void);
+int htm_suspended(register_t msr);
+int htm_transactional(register_t msr);
+
 
 
 #endif	/* _MACHINE_HTM_H_ */

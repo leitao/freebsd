@@ -204,7 +204,7 @@ blocked_loop:
 
 2:
 	lwz	%r6, PCB_FLAGS(%r17)
-	/* Restore Altivec context if needed */
+	/* Restore HTM context if needed */
 	andi.	%r6, %r6, PCB_HTM
 	beq	.L4
 	mr	%r3,%r13		/* Pass curthread to enable_vec */

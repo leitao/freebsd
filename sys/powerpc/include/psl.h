@@ -72,6 +72,8 @@
 #define PSL_HV		0x1000000000000000UL	/* hyper-privileged mode */
 #define PSL_HTM		0x0000000100000000UL	/* Hardware Transactional Memory available */
 #define PSL_HTM_TS	0x0000000600000000UL	/* Hardware Transactional Memory State */
+#define PSL_HTM_TS_S	0x0000000200000000UL	/* Hardware Transactional Memory Suspended */
+#define PSL_HTM_TS_T	0x0000000400000000UL	/* Hardware Transactional Memory Transactional */
 #endif
 
 #define	PSL_POW		0x00040000UL	/* power management */
