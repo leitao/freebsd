@@ -136,6 +136,16 @@ mfpvr(void)
 	return (value);
 }
 
+static __inline register_t
+mfdscr(void)
+{
+	register_t value;
+
+	__asm __volatile ("mfspr %0, 0x11" : "=r"(value));
+
+	return (value);
+}
+
 static __inline u_quad_t
 mftb(void)
 {
