@@ -93,11 +93,12 @@
 
 #define	SPR_MQ			0x000	/* .6. 601 MQ register */
 #define	SPR_XER			0x001	/* 468 Fixed Point Exception Register */
+#define	SPR_DSCR3		0x003   /* Data Stream Control Register */
 #define	SPR_RTCU_R		0x004	/* .6. 601 RTC Upper - Read */
 #define	SPR_RTCL_R		0x005	/* .6. 601 RTC Lower - Read */
 #define	SPR_LR			0x008	/* 468 Link Register */
 #define	SPR_CTR			0x009	/* 468 Count Register */
-#define	SPR_DSCR		0x011   /* Data Stream Control Register */
+#define	SPR_DSCR17		0x011   /* Data Stream Control Register */
 #define	SPR_DSISR		0x012	/* .68 DSI exception source */
 #define	  DSISR_DIRECT		  0x80000000 /* Direct-store error exception */
 #define	  DSISR_NOTFOUND	  0x40000000 /* Translation not found */

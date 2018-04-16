@@ -1027,7 +1027,7 @@ emulate_mfspr(int spr, int reg, struct trapframe *frame){
 
 	td = curthread;
 
-	if (spr == SPR_DSCR) {
+	if (spr == SPR_DSCR3 || spr == SPR_DSCR17) {
 		// If DSCR was never set, get the default DSCR
 		if ((td->td_pcb->pcb_flags & PCB_CDSCR) == 0)
 			td->td_pcb->pcb_dscr = mfdscr();
@@ -1045,7 +1045,7 @@ emulate_mtspr(int spr, int reg, struct trapframe *frame){
 
 	td = curthread;
 
-	if (spr == SPR_DSCR) {
+	if (spr == SPR_DSCR3 || spr == SPR_DSCR17) {
 		td->td_pcb->pcb_flags |= PCB_CDSCR;
 		td->td_pcb->pcb_dscr = frame->fixreg[reg];
 		frame->srr0 += 4;
