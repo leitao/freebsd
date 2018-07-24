@@ -70,6 +70,8 @@
 #ifdef __powerpc64__
 #define PSL_SF		0x8000000000000000UL	/* 64-bit addressing */
 #define PSL_HV		0x1000000000000000UL	/* hyper-privileged mode */
+#define PSL_HTM 	0x0000000100000000UL	/* Hardware Transactional Memory available */
+#define PSL_HTM_TS	0x0000000600000000UL	/* Hardware Transactional Memory State */
 #endif
 
 #define	PSL_POW		0x00040000UL	/* power management */
@@ -89,6 +91,14 @@
 #define	PSL_FE_REC	PSL_FE0		/* imprecise recoverable */
 #define	PSL_FE_PREC	(PSL_FE0 | PSL_FE1) /* precise */
 #define	PSL_FE_DFLT	PSL_FE_DIS	/* default == none */
+
+/*
+ * Hardware Transactional Memory States
+ */
+#define PSL_HTM_TS_NT	0x0000000000000000UL	/* Non Transactional */
+#define PSL_HTM_TS_SU	0x0000000200000000UL	/* Suspended */
+#define PSL_HTM_TS_TR	0x0000000400000000UL	/* Transactional */
+#define PSL_HTM_TS_RE	0x0000000600000000UL	/* Reserved */
 
 #ifndef LOCORE
 extern register_t psl_kernset;		/* Default MSR values for kernel */

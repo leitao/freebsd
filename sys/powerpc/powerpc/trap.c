@@ -63,6 +63,7 @@ __FBSDID("$FreeBSD$");
 
 #include <machine/_inttypes.h>
 #include <machine/altivec.h>
+#include <machine/htm.h>
 #include <machine/cpu.h>
 #include <machine/db_machdep.h>
 #include <machine/fpu.h>
@@ -72,6 +73,8 @@ __FBSDID("$FreeBSD$");
 #include <machine/trap.h>
 #include <machine/spr.h>
 #include <machine/sr.h>
+
+#include "opt_platform.h"
 
 /* Below matches setjmp.S */
 #define	FAULTBUF_LR	21
@@ -169,6 +172,16 @@ static struct powerpc_exception powerpc_exceptions[] = {
     "\020L3DAT\017APE\016DPE\015TEA\014b20\013b21\012b22\011b23"	\
     "\010b24\007b25\006b26\005b27\004b28\003b29\002b30\001b31"
 
+static inline bool
+frame_is_bad_thing(struct trapframe *frame)
+{
+#ifdef AIM
+	return (frame->exc == EXC_PGM && frame->srr1 & EXC_PGM_BAD_THING);
+#else
+	return 0;
+#endif
+}
+
 
 static const char *
 trapname(u_int vector)
@@ -225,6 +238,15 @@ trap(struct trapframe *frame)
 	CTR3(KTR_TRAP, "trap: %s type=%s (%s)", td->td_name,
 	    trapname(type), user ? "user" : "kernel");
 
+#ifdef HTM
+	if (td->td_pcb->pcb_flags & PCB_HTM)
+		enable_htm_current_cpu();
+
+	/* There is a trap inside the transaction. Dooming it */
+	if (htm_active(frame->srr1))
+		tabort();
+#endif
+
 #ifdef KDTRACE_HOOKS
 	/*
 	 * A trap can occur while DTrace executes a probe. Before
@@ -275,6 +297,14 @@ trap(struct trapframe *frame)
 			break;
 
 		case EXC_SC:
+#ifdef HTM
+			/* It is not allowed to call SC inside a transaction */
+			if (htm_transactional(frame->srr1)) {
+				sig = SIGILL;
+				ucode = ILL_ILLTRP;
+				break;
+			}
+#endif
 			syscall(frame);
 			break;
 
@@ -303,9 +333,12 @@ trap(struct trapframe *frame)
 
 		case EXC_FAC:
 			fscr = mfspr(SPR_FSCR);
+#ifdef HTM
 			if ((fscr & FSCR_IC_MASK) == FSCR_IC_HTM) {
-				CTR0(KTR_TRAP, "Hardware Transactional Memory subsystem disabled");
+				enable_htm_thread(td);
+				break;
 			}
+#endif
 			sig = SIGILL;
 			ucode =	ILL_ILLOPC;
 			break;
@@ -350,6 +383,13 @@ trap(struct trapframe *frame)
 		case EXC_PGM:
 			/* Identify the trap reason */
 			if (frame_is_trap_inst(frame)) {
+#ifdef HTM
+				if (htm_transactional(frame->srr1)) {
+					sig = SIGILL;
+					ucode = ILL_ILLTRP;
+					break;
+				}
+#endif
 #ifdef KDTRACE_HOOKS
 				inst = fuword32((const void *)frame->srr0);
 				if (inst == 0x0FFFDDDD &&
@@ -360,6 +400,10 @@ trap(struct trapframe *frame)
 #endif
  				sig = SIGTRAP;
 				ucode = TRAP_BRKPT;
+			} else if (frame_is_bad_thing(frame)) {
+				CTR1(KTR_TRAP, "%s: Bad thing exception from userspace\n", td->td_name);
+				sig = SIGILL;
+				ucode =	ILL_ILLOPC;
 			} else {
 				sig = ppc_instr_emulate(frame, td->td_pcb);
 				if (sig == SIGILL) {
@@ -392,6 +436,8 @@ trap(struct trapframe *frame)
 		    ("kernel trap doesn't have ucred"));
 		switch (type) {
 		case EXC_PGM:
+			if (frame_is_bad_thing(frame))
+				panic("Bad thing exception in kernel space\n");
 #ifdef KDTRACE_HOOKS
 			if (frame_is_trap_inst(frame)) {
 				if (*(uint32_t *)frame->srr0 == EXC_DTRACE) {
@@ -426,13 +472,21 @@ trap(struct trapframe *frame)
 			if (handle_onfault(frame))
  				return;
 			break;
+		case EXC_FAC:
+			fscr = mfspr(SPR_FSCR);
+			panic("Unavailability Facility in Kernel space. FSCR = 0x%" PRIxPTR, fscr);
 		default:
 			break;
 		}
 		trap_fatal(frame);
 	}
 
-	if (sig != 0) {
+	if (sig != 0 && !htm_active(frame->srr1)) {
+		/* We should never call a signal handler if a transaction is
+		 * active, mainly because the transaction is already dommed,
+		 * since we entered kernel space, here, thus, it will rollback
+		 * and call the failure handler
+		 */
 		if (p->p_sysent->sv_transtrap != NULL)
 			sig = (p->p_sysent->sv_transtrap)(sig, type);
 		ksiginfo_init_trap(&ksi);
@@ -915,6 +969,7 @@ db_trap_glue(struct trapframe *frame)
 {
 
 	if (!(frame->srr1 & PSL_PR)
+	    && !htm_active(frame->srr1)
 	    && (frame->exc == EXC_TRC || frame->exc == EXC_RUNMODETRC
 	    	|| frame_is_trap_inst(frame)
 		|| frame->exc == EXC_BPT
