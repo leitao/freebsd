@@ -121,6 +121,9 @@
 #define	SPR_EIE			0x050	/* ..8 Exception Interrupt ??? */
 #define	SPR_EID			0x051	/* ..8 Exception Interrupt ??? */
 #define	SPR_NRI			0x052	/* ..8 Exception Interrupt ??? */
+#define	SPR_TFHAR		0x080	/* Transaction Failure Handler Address Register */
+#define	SPR_TFIAR		0x081	/* Transaction Failure Instruction Address Register */
+#define	SPR_TEXASR		0x082	/* Transaction EXception And Status Register */
 #define	SPR_FSCR		0x099	/* Facility Status and Control Register */
 #define FSCR_IC_MASK		  0xFF00000000000000ULL	/* FSCR[0:7] is Interrupt Cause */
 #define FSCR_IC_FP		  0x0000000000000000ULL	/* FP unavailable */

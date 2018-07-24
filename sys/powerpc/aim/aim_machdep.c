@@ -105,6 +105,7 @@ __FBSDID("$FreeBSD$");
 #include <vm/vm_pager.h>
 
 #include <machine/altivec.h>
+#include <machine/htm.h>
 #ifndef __powerpc64__
 #include <machine/bat.h>
 #endif
@@ -638,6 +639,7 @@ cpu_sleep()
 	jmp_buf resetjb;
 	struct thread *fputd;
 	struct thread *vectd;
+	struct thread *htmtd;
 	register_t hid0;
 	register_t msr;
 	register_t saved_msr;
@@ -649,10 +651,13 @@ cpu_sleep()
 	saved_msr = mfmsr();
 	fputd = PCPU_GET(fputhread);
 	vectd = PCPU_GET(vecthread);
+	htmtd = PCPU_GET(htmthread);
 	if (fputd != NULL)
 		save_fpu(fputd);
 	if (vectd != NULL)
 		save_vec(vectd);
+	if (htmtd != NULL)
+		save_htm(htmtd);
 	if (setjmp(resetjb) == 0) {
 		sprgs[0] = mfspr(SPR_SPRG0);
 		sprgs[1] = mfspr(SPR_SPRG1);

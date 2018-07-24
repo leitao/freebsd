@@ -133,6 +133,7 @@
  * 2.05.
  */
 
+#define	EXC_PGM_BAD_THING	(1UL << 21)
 #define	EXC_PGM_FPENABLED	(1UL << 20)
 #define	EXC_PGM_ILLEGAL		(1UL << 19)
 #define	EXC_PGM_PRIV		(1UL << 18)
